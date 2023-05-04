@@ -3,8 +3,6 @@ import numpy as np
 import math
 
 # - going to assume a fully connected NN for sake of simplicity
-# - not going to explicitly store the bias neurons, and instead will add them
-# in as needed in the forward and backward propagation functions
 class neural_net:
     # - input_nodes specifies the number of input nodes
     # - hidden_layers is a list, where each entry is an integer specifying the number
@@ -76,11 +74,10 @@ class neural_net:
         activation = self.activation_func(activation)
         return activation, ret_activ
 
-    # - TODO: implement
-    # - allow list of instances?
+    # - TODO: test
     def backward_propagation(self, instances: np.array, labels: np.array, lambda_: float, alpha: float):
         # initialize D to all 0's, same dimension as the weights
-        grads = deepcopy(self.weights) 
+        grads = deepcopy(self.weights) # just copying to get the dimensions right
         for layer in grads:
             layer *= 0
 
@@ -92,7 +89,7 @@ class neural_net:
                 deltas.append([])
                 regularizers.append([])
             deltas[-1] = preds - label 
-            # "For each network layer, k = L - 1 ... 2"
+            # "For each network layer, k = L - 1...2"
             for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
                 tmp = np.matmul(np.transpose(self.weights[k]), deltas[k + 1]) # = weights^T x delta from previous layer ...
                 tmp = np.multiply(tmp, activations[k]) # (element-wise) ... *  activation of current layer 
@@ -100,24 +97,25 @@ class neural_net:
                 tmp = np.delete(tmp, 0) # remove first element (bias neuron)
                 deltas[k] = tmp
             
-            # "For each network layer, k = L - 1 ... 1"
+            # "For each network layer, k = L - 1...1"
             for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
                 grads[k] += np.matmul(deltas[k + 1], np.transpose(activations[k + 1])) # accumulates, in D(l=k), the gradients computed based on the current training instance
-        # "For each network layer, k= L - 1 ... 1"
+        # "For each network layer, k= L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = lambda_ * self.weights[k]
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
-        # "For each network layer, k = L - 1 ... 1"
-        for k in range(len(self.weights) - 1, -1, -1):
-            self.weights[k] -= alpha * grads[k]        
+        # "For each network layer, k = L - 1...1"
+        for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
+            self.weights[k] -= alpha * grads[k]
 
     def activation_func(self, input_arr: np.array) -> np.array:
         if self.activation_function == "sigmoid":
             return 1 / (1 + np.exp(-input_arr))
+        elif self.activation_function == "ReLU":
+            return [max(0, x) for x in input_arr]
         else:
             raise(f"Invalid activation function parameter passed! {self.activation_function=}")
-
 
     def print_layers(self):
         for layer in self.weights:

@@ -15,6 +15,7 @@ def main():
         print(i)
 
     test_matrix = np.array([[1,2,3], [4,5,6], [7,8,9]])
+    test_arr = np.array([1,-2,3])
     print(f"{test_matrix=}")
     test_matrix *= 0
     print(f"{test_matrix=}")

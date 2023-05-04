@@ -1,3 +1,4 @@
+﻿from copy import deepcopy
 import numpy as np
 import math
 
@@ -57,23 +58,63 @@ class neural_net:
         activation = self.activation_func(activation)
         return activation
 
+    # same as forward_propagation but also returns the activations for each hidden layer
+    # going to keep the two separate for performance reasons
+    def forward_propagation_ret_act(self, instance: np.array) -> np.array:
+        ret_activ = list()
+        activation = np.insert(instance, 0, 1) # add the bias term to the input
+
+        # for hidden layers 0...n-1
+        for i in range(len(self.weights) - 1):
+            activation = np.matmul(self.weights[i], activation) # multiply vector with hidden layer weights
+            activation = self.activation_func(activation) # apply activation function g element-wise
+            activation = np.insert(activation, 0, 1) # add bias term back in
+            ret_activ.append(activation)
+        
+        # apply last hidden layer, get output values
+        activation = np.matmul(self.weights[-1], activation) 
+        activation = self.activation_func(activation)
+        return activation, ret_activ
+
     # - TODO: implement
     # - allow list of instances?
-    def backward_propagation(self, instance: np.array):
-        # propagate instance through network
-        # compute error for all output neurons
-        # for all neurons in hidden layers
-            # compute delta values, ignoring bias neurons (first column?)
-        # for each network layer
-            # compute gradient
-        # for each network layer
-            # compute final regularized gradient
-        pass
-        
+    def backward_propagation(self, instances: np.array, labels: np.array, lambda_: float, alpha: float):
+        # initialize D to all 0's, same dimension as the weights
+        grads = deepcopy(self.weights) 
+        for layer in grads:
+            layer *= 0
 
-    def activation_func(self, input: np.array) -> np.array:
+        for instance, label in instances, labels:
+            preds, activations = self.forward_propagation_ret_act(instance)
+            deltas = list()
+            regularizers = list()
+            for _ in range(len(self.weights)):
+                deltas.append([])
+                regularizers.append([])
+            deltas[-1] = preds - label 
+            # "For each network layer, k = L - 1 ... 2"
+            for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
+                tmp = np.matmul(np.transpose(self.weights[k]), deltas[k + 1]) # = weights^T x delta from previous layer ...
+                tmp = np.multiply(tmp, activations[k]) # (element-wise) ... *  activation of current layer 
+                tmp = np.multiply(tmp, 1 - activations[k]) # (element-wise) ... * (1 - activation of current layer)
+                tmp = np.delete(tmp, 0) # remove first element (bias neuron)
+                deltas[k] = tmp
+            
+            # "For each network layer, k = L - 1 ... 1"
+            for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
+                grads[k] += np.matmul(deltas[k + 1], np.transpose(activations[k + 1])) # accumulates, in D(l=k), the gradients computed based on the current training instance
+        # "For each network layer, k= L - 1 ... 1"
+        for k in range(len(self.weights) - 1, -1, -1):
+            regularizers[k] = lambda_ * self.weights[k]
+            grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
+        # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
+        # "For each network layer, k = L - 1 ... 1"
+        for k in range(len(self.weights) - 1, -1, -1):
+            self.weights[k] -= alpha * grads[k]        
+
+    def activation_func(self, input_arr: np.array) -> np.array:
         if self.activation_function == "sigmoid":
-            return 1 / (1 + np.exp(-input))
+            return 1 / (1 + np.exp(-input_arr))
         else:
             raise(f"Invalid activation function parameter passed! {self.activation_function=}")
 

@@ -40,6 +40,8 @@ def test_examples():
     total_cost = test_nn.reg_cost_func(preds, labels)
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
+    test_nn.backward_propagation(instances, labels)
+
 
     #
     # Example 2:
@@ -85,6 +87,7 @@ def main():
 
     #print(f"{np.shape(starting_weights[0])=}")
     #print(f"{np.shape(starting_weights[0])[0]=}")
+    print(f"{5 + np.nan}")
     test_arr = np.array([1,2,3])
     print(f"{np.shape(test_arr)}")
     print(f"{len(np.shape(test_arr))}")

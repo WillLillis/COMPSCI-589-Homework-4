@@ -1,5 +1,4 @@
-﻿from cmath import nan
-from copy import deepcopy
+﻿from copy import deepcopy
 import numpy as np
 
 # - going to assume a fully connected NN for sake of simplicity
@@ -9,7 +8,7 @@ class neural_net:
     # of nodes in that layer
     # - lambda_ : regularization term
     # - activ_func : which activation function to use
-    def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_: float, activ_func="sigmoid"):
+    def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_: float, alpha=1.0, activ_func="sigmoid"):
         # sanity checks 
         if input_nodes <= 0:
             raise(f"Invalid parameter: {input_nodes=}")
@@ -21,6 +20,7 @@ class neural_net:
 
         self.activation_function = activ_func
         self.lambda_ = lambda_
+        self.alpha = alpha
 
         # now that we've done some parameter checks...
         self.weights = list() # list to hold the numpy arrays (make this a numpy array too?)
@@ -89,8 +89,11 @@ class neural_net:
         activation = self.activation_func(activation)
         return activation, ret_activ
 
-    # - TODO: test
-    def backward_propagation(self, instances: np.array, labels: np.array, lambda_: float, alpha: float):
+    # - TODO: fix
+        # probably lots of off by 1 errors because of 0 vs. 1 based indexing in slides
+            # k+1-> k
+            # k-> k-1
+    def backward_propagation(self, instances: np.array, labels: np.array) -> None:
         # initialize D to all 0's, same dimension as the weights
         grads = deepcopy(self.weights) # just copying to get the dimensions right
         for layer in grads:
@@ -120,12 +123,12 @@ class neural_net:
                 grads[k] += np.matmul(deltas[k + 1], np.transpose(activations[k + 1])) # accumulates, in D(l=k), the gradients computed based on the current training instance
         # "For each network layer, k= L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1):
-            regularizers[k] = lambda_ * self.weights[k]
+            regularizers[k] = self.lambda_ * self.weights[k]
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
-            self.weights[k] -= alpha * grads[k]
+            self.weights[k] -= self.alpha * grads[k]
 
     def activation_func(self, input_arr: np.array) -> np.array:
         if self.activation_function == "sigmoid":
@@ -135,7 +138,7 @@ class neural_net:
         else:
             raise(f"Invalid activation function parameter passed! {self.activation_function=}")
     
-    # computes cost for INDIVIDUAL prediction and expected output
+    # computes cost for INDIVIDUAL prediction and expected output instances
     @staticmethod
     def indiv_cost_func(pred: np.array, label: np.array) -> float:
         # check dimensions
@@ -144,19 +147,16 @@ class neural_net:
             raise("Dimension error!")
         accum = 0
         for i in range(len(pred)):
-            #print(f"{pred[i]=}, {label[i]=}")
-            #print(f"+= {-label[i]} ln({pred[i]}) - (1 - {label[i]})ln(1 - {pred[i]})")
             accum += (-label[i] * (np.log(pred[i]))) - (1 - label[i]) * (np.log(1 - pred[i]))
         return accum
 
 
-    # figure out wtf is going on
     # preds and labels are lists containing np.array's
     def reg_cost_func(self, preds: list, labels: list) -> float:
         # check lengths of lists
         if len(preds) != len(labels):
             print(f"ERROR! Mismatching lengths for prediction and label lists. ({len(preds)=}, {len(labels)=})")
-            return nan
+            return np.nan
 
         accum = 0
         # iterate through preds, and labels, get indiviudal costs into accum
@@ -180,7 +180,7 @@ class neural_net:
                         reg += layer[i][j]**2
                 else:
                     print("ISSUE: 3D weight matrix???")
-                    return nan
+                    return np.nan
         # S = (lambda/ 2n) * S
         reg = (self.lambda_ / (2 * len(preds))) * reg
             
@@ -198,7 +198,7 @@ class neural_net:
         self.weights = deepcopy(weights_in)
         return True
 
-    def print_layers(self, dims=False):
+    def print_layers(self, dims=False)  -> None:
         for layer in self.weights:
             if dims == True:
                 print(np.shape(layer))

@@ -9,7 +9,7 @@ def test_examples():
     #   Forward Propagation:
     print("Example 1:")
     test_nn = neural_net(1, 1, [2], 0.0)
-    starting_weights = list([np.array([[0.4, 0.1], [0.3, 0.2]]), np.array([0.7, 0.5, 0.6])])
+    starting_weights = list([np.array([[0.4, 0.1], [0.3, 0.2]]), np.array([np.array([0.7, 0.5, 0.6])])])
     test_nn.set_weights(starting_weights)
     print("Neural net layers:")
     test_nn.print_layers()

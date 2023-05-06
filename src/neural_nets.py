@@ -29,20 +29,36 @@ class neural_net:
         weight_tmp = np.array(np.random.normal(0, 1, input_nodes + 1)) # + 1 for bias weights
         for _ in range(hidden_layers[0] - 1):
             weight_tmp = np.vstack((weight_tmp, np.random.normal(0, 1, input_nodes + 1))) # + 1 for bias weights
-        self.weights.append(weight_tmp)
+        if len(np.shape(weight_tmp)) == 1:
+            self.weights.append(np.array([weight_tmp]))
+        elif len(np.shape(weight_tmp)) == 2:
+            self.weights.append(weight_tmp)
+        else:
+            print("ERROR: INVALID DIMENSIONS!!!")
+
 
         # now for the hidden layers connecting to one another
         for i in range(len(hidden_layers) - 1):
              weight_tmp = np.array(np.random.normal(0, 1, hidden_layers[i] + 1)) # + 1 for bias weights
              for _ in range(hidden_layers[i + 1] - 1):
                 weight_tmp = np.vstack((weight_tmp, np.random.normal(0, 1, hidden_layers[i] + 1))) # + 1 for bias weights
-             self.weights.append(weight_tmp)
+             if len(np.shape(weight_tmp)) == 1:
+                self.weights.append(np.array([weight_tmp]))
+             elif len(np.shape(weight_tmp)) == 2:
+                self.weights.append(weight_tmp)
+             else:
+                print("ERROR: INVALID DIMENSIONS!!!")
 
         # and finally the last hidden layer connecting to the output layer
         weight_tmp = np.array(np.random.normal(0, 1, hidden_layers[-1] + 1)) # + 1 for bias weights
         for _ in range(output_nodes - 1):
             weight_tmp = np.vstack((weight_tmp, np.random.normal(0, 1, hidden_layers[-1] + 1))) # + 1 for bias weights
-        self.weights.append(weight_tmp)
+        if len(np.shape(weight_tmp)) == 1:
+            self.weights.append(np.array([weight_tmp]))
+        elif len(np.shape(weight_tmp)) == 2:
+            self.weights.append(weight_tmp)
+        else:
+            print("ERROR: INVALID DIMENSIONS!!!")
 
     # - propagate instance through the network, get np array of output nodes returned
     def forward_propagation(self, instance: np.array, test=False) -> np.array:
@@ -102,6 +118,7 @@ class neural_net:
         for index in range(len(grads)):
             grads[index] *= 0
             if len(np.shape(grads[index])) == 1:
+                print("Do I still print?")
                 grads[index] = np.array([grads[index]])
 
         regularizers = deepcopy(grads)
@@ -126,7 +143,8 @@ class neural_net:
 
             # "For each network layer, k = L - 1...2"
             for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
-                tmp = np.matmul(np.array([self.weights[k]]).T, np.array([deltas[k]]))
+                #tmp = np.matmul(np.array([self.weights[k]]).T, np.array([deltas[k]]))
+                tmp = np.matmul(self.weights[k].T, np.array([deltas[k]]))
                 tmp *= np.array([activations[k]]).T
                 tmp *=  np.array([(1 - activations[k])]).T
                 tmp = np.delete(tmp, 0)
@@ -155,7 +173,6 @@ class neural_net:
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
-            print(f"{np.shape(self.weights[k])=}")
             self.weights[k] -= self.alpha * grads[k]
 
     def activation_func(self, input_arr: np.array) -> np.array:

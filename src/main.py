@@ -14,34 +14,28 @@ def test_examples():
     print("Neural net layers:")
     test_nn.print_layers()
 
-    # TODO: finish making everything into a list
-    # 
-
     instances = list([np.array([0.13]), np.array([0.42])])
     labels = list([np.array([0.9]), np.array([0.23])])
     preds = list()
-    #instance_1 = np.array([0.13])
-    #label_1 = np.array([0.9])
-    #instance_2 = np.array([0.42])
-    #label_2 = np.array([0.23])
     
-    preds.append(np.array([test_nn.forward_propagation(instances[0], test=True)])) # a's and z's are printed within the function when the test flag is set
-    print(f"Predicted output for instance 1: {preds[0]}")
-    print(f"Expected output for instance 1: {labels[0]}")
-    cost_1 = neural_net.indiv_cost_func(preds[0], labels[0])
-    print(f"Cost, J, associated with instance 1: {cost_1}")
+    #preds.append(np.array([test_nn.forward_propagation(instances[0], test=True)])) # a's and z's are printed within the function when the test flag is set
+    #print(f"Predicted output for instance 1: {preds[0]}")
+    #print(f"Expected output for instance 1: {labels[0]}")
+    #cost_1 = neural_net.indiv_cost_func(preds[0], labels[0])
+    #print(f"Cost, J, associated with instance 1: {cost_1}")
 
-    preds.append(np.array([test_nn.forward_propagation(instances[1], test=True)])) # a's and z's are printed within the function when the test flag is set
-    print(f"Predicted output for instance 1: {preds[1]}")
-    print(f"Expected output for instance 1: {labels[1]}")
-    cost_2 = neural_net.indiv_cost_func(preds[1], labels[1])
-    print(f"Cost, J, associated with instance 2: {cost_2}")
+    #preds.append(np.array([test_nn.forward_propagation(instances[1], test=True)])) # a's and z's are printed within the function when the test flag is set
+    #print(f"Predicted output for instance 1: {preds[1]}")
+    #print(f"Expected output for instance 1: {labels[1]}")
+    #cost_2 = neural_net.indiv_cost_func(preds[1], labels[1])
+    #print(f"Cost, J, associated with instance 2: {cost_2}")
 
-    total_cost = test_nn.reg_cost_func(preds, labels)
-    print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
+    #total_cost = test_nn.reg_cost_func(preds, labels)
+    #print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
-    test_nn.backward_propagation(instances, labels)
+    test_nn.backward_propagation(instances, labels, test=True)
 
+    return
 
     #
     # Example 2:
@@ -59,10 +53,6 @@ def test_examples():
     instances = list([np.array([0.32, 0.68]), np.array([0.83, 0.02])])
     labels = list([np.array([0.75, 0.98]), np.array([0.75, 0.28])])
     preds = list()
-    #instance_1 = np.array([0.32, 0.68])
-    #label_1 = np.array([0.75, 0.98])
-    #instance_2 = np.array([0.83, 0.02])
-    #label_2 = np.array([0.75, 0.28])
 
     preds.append(test_nn.forward_propagation(instances[0], test=True)) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[0]}")
@@ -87,6 +77,13 @@ def main():
 
     #print(f"{np.shape(starting_weights[0])=}")
     #print(f"{np.shape(starting_weights[0])[0]=}")
+    test = list()
+    test.append(5)
+    test.append(5)
+    print(f"{test[-1]=}")
+    tmp = len(test) -1 
+    print(f"test[{tmp}]={test[tmp]}")
+
     print(f"{5 + np.nan}")
     test_arr = np.array([1,2,3])
     print(f"{np.shape(test_arr)}")

@@ -70,23 +70,7 @@ def test_examples():
 
 
 def main():
-    #starting_weights = list([np.array([[0.42, 0.15, 0.4], [0.72, 0.1, 0.54], [0.01, 0.19, 0.42], [0.3, 0.35, 0.68]]), \
-    #   np.array([[0.21, 0.67, 0.14, 0.96, 0.87], [0.87, 0.42, 0.2, 0.32, 0.89], [0.03, 0.56, 0.8, 0.69, 0.09]]), \
-    #   np.array([[0.04, 0.87, 0.42, 0.53], [0.17, 0.1, 0.95, 0.69]])])
-
-    #print(f"{np.shape(starting_weights[0])=}")
-    #print(f"{np.shape(starting_weights[0])[0]=}")
-    test = list()
-    test.append(5)
-    test.append(5)
-    print(f"{test[-1]=}")
-    tmp = len(test) -1 
-    print(f"test[{tmp}]={test[tmp]}")
-
-    print(f"{5 + np.nan}")
-    test_arr = np.array([1,2,3])
-    print(f"{np.shape(test_arr)}")
-    print(f"{len(np.shape(test_arr))}")
+    pass
 
 
 if __name__ == "__main__":

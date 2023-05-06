@@ -11,12 +11,15 @@ class neural_net:
     def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_: float, alpha=1.0, activ_func="sigmoid"):
         # sanity checks 
         if input_nodes <= 0:
-            raise(f"Invalid parameter: {input_nodes=}")
+            print(f"Invalid parameter: {input_nodes=}")
+            raise("Inavlid parameter")
         if output_nodes <= 0:
-            raise(f"Invalid parameter: {output_nodes=}")
+            print(f"Invalid parameter: {output_nodes=}")
+            raise("Inavlid parameter")
         for i in range(len(hidden_layers)):
             if hidden_layers[i] <= 0:
-                raise(f"Invalid parameter: {hidden_layers[i]=}")
+                print(f"Invalid parameter: {hidden_layers[i]=}")
+                raise("Inavlid parameter")
 
         self.activation_function = activ_func
         self.lambda_ = lambda_
@@ -92,22 +95,21 @@ class neural_net:
     def forward_propagation_ret_act(self, instance: np.array) -> np.array:
         ret_activ = list()
         activation = np.insert(instance, 0, 1) # add the bias term to the input
-        ret_activ.append(np.array([activation]).T)
+        ret_activ.append(np.array([activation]).T) # Transpose to match expected shape in backprop alg
 
         # for hidden layers 0...n-1
         for i in range(len(self.weights) - 1):
             activation = np.matmul(self.weights[i], activation) # multiply vector with hidden layer weights
             activation = self.activation_func(activation) # apply activation function g element-wise
             activation = np.insert(activation, 0, 1) # add bias term back in
-            ret_activ.append(np.array([activation]).T)
+            ret_activ.append(np.array([activation]).T) # Transpose to match expected shape in backprop alg
         
         # apply last hidden layer, get output values
         activation = np.matmul(self.weights[-1], activation) 
         activation = self.activation_func(activation)
-        ret_activ.append(np.array([activation]).T)
+        ret_activ.append(np.array([activation]).T) # Transpose to match expected shape in backprop alg
         return np.array([activation]), ret_activ
 
-    # - TODO: fix numpy dimension issues
     def backward_propagation(self, instances: list, labels: list, test=False) -> None:
         # check to make sure instances and labels is the same length!
         if len(instances) != len(labels):
@@ -116,9 +118,9 @@ class neural_net:
         grads = deepcopy(self.weights) # just copying to get the dimensions right
 
         for index in range(len(grads)):
-            grads[index] *= 0
+            grads[index][:] = 0 # zero out all entries in the matrix
 
-        regularizers = deepcopy(grads)
+        regularizers = deepcopy(grads) # same dimensions as weights, also needs to be initialized to zero
 
         for index in range(len(instances)):
             if test == True:
@@ -133,7 +135,7 @@ class neural_net:
                 regularizers.append(None)
 
             deltas[-1] = preds - labels[index]
-            if len(np.shape(deltas[-1])) == 2:
+            if len(np.shape(deltas[-1])) == 2: # more dimensionality fixes for numpy nonsense
                 deltas[-1] = deltas[-1].T
             
             if test == True:
@@ -151,6 +153,7 @@ class neural_net:
                     deltas[k - 1] = tmp
                 else:
                     print("Lol time to be sad")
+                    raise("Dimension error!")
                 if test == True:
                     print(f"\tdelta{k+1}: {deltas[k - 1]}")
                 
@@ -158,8 +161,7 @@ class neural_net:
             for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
                 grads[k] += np.matmul(deltas[k], activations[k].T) # accumulates, in D(l=k), the gradients computed based on the current training instance
                 if test == True:
-                    test_tmp = np.matmul(deltas[k], activations[k].T)
-                    print(f"\tGradients of Theta{k + 1} based on training instance {index + 1}:\n\t{test_tmp}")
+                    print(f"\tGradients of Theta{k + 1} based on training instance {index + 1}:\n\t{np.matmul(deltas[k], activations[k].T)}")
             
         # "For each network layer, k= L - 1...1"
         if test == True:
@@ -173,7 +175,6 @@ class neural_net:
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
-            #print(f"{np.shape(self.weights[k])}, {np.shape(grads[k])}")
             self.weights[k] -= self.alpha * grads[k]
 
     def activation_func(self, input_arr: np.array) -> np.array:
@@ -219,14 +220,8 @@ class neural_net:
             # couldn't find a good way to sum all the columns up except the first
             # so I guess we're doing this explicitly...
             for i in range(np.shape(layer)[0]):
-                if len(np.shape(layer)) == 1:
-                    reg += layer[i]**2
-                elif len(np.shape(layer)) == 2:
-                    for j in range(1, np.shape(layer)[1]):
+                for j in range(1, np.shape(layer)[1]):
                         reg += layer[i][j]**2
-                else:
-                    print("ISSUE: 3D weight matrix???")
-                    return np.nan
         # S = (lambda/ 2n) * S
         reg = (self.lambda_ / (2 * len(preds))) * reg
             

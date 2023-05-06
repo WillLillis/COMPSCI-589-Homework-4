@@ -1,0 +1,139 @@
+Example 1:
+Neural net layers:
+[[0.4 0.1]
+ [0.3 0.2]]
+[[0.7 0.5 0.6]]
+a_1: [1.   0.13]
+z_2: [0.413 0.326]
+a_2: [1.        0.601807  0.5807858]
+z_3: [1.34937498]
+a_3: [0.79402743]
+f(x): [0.79402743]
+Predicted output for instance 1: [[0.79402743]]
+Expected output for instance 1: [[0.9]]
+Cost, J, associated with instance 1: [0.36557477]
+a_1: [1.   0.42]
+z_2: [0.442 0.384]
+a_2: [1.         0.60873549 0.59483749]
+z_3: [1.36127024]
+a_3: [0.79596607]
+f(x): [0.79596607]
+Predicted output for instance 2: [[0.79596607]]
+Expected output for instance 2: [[0.23]]
+Cost, J, associated with instance 2: [1.27637681]
+Final (regularized) cost, J, based on the complete training set: [0.82097579]
+Computing gradients based on training instance 1
+	delta3: [[-0.10597257]]
+	delta2: [[-0.01269739]
+ [-0.01548092]]
+	Gradients of Theta2 based on training instance 1:
+	[[-0.10597257 -0.06377504 -0.06154737]]
+	Gradients of Theta1 based on training instance 1:
+	[[-0.01269739 -0.00165066]
+ [-0.01548092 -0.00201252]]
+Computing gradients based on training instance 2
+	delta3: [[0.56596607]]
+	delta2: [[0.06739994]
+ [0.08184068]]
+	Gradients of Theta2 based on training instance 2:
+	[[0.56596607 0.34452363 0.33665784]]
+	Gradients of Theta1 based on training instance 2:
+	[[0.06739994 0.02830797]
+ [0.08184068 0.03437309]]
+The entire training set has been processed. Computing the average (regularized) gradients:
+Final regularized gradients of Theta2:
+[[0.22999675 0.1403743  0.13755523]]
+Final regularized gradients of Theta1:
+[[0.02735127 0.01332866]
+ [0.03317988 0.01618028]]
+Example 2:
+Neural net layers:
+[[0.42 0.15 0.4 ]
+ [0.72 0.1  0.54]
+ [0.01 0.19 0.42]
+ [0.3  0.35 0.68]]
+[[0.21 0.67 0.14 0.96 0.87]
+ [0.87 0.42 0.2  0.32 0.89]
+ [0.03 0.56 0.8  0.69 0.09]]
+[[0.04 0.87 0.42 0.53]
+ [0.17 0.1  0.95 0.69]]
+a_1: [1.   0.32 0.68]
+z_2: [0.74   1.1192 0.3564 0.8744]
+a_2: [1.         0.67699586 0.75384029 0.5881687  0.70566042]
+z_3: [1.94769138 2.12135808 1.48153575]
+a_3: [1.         0.87519469 0.89296181 0.81480444]
+z_4: [1.60830969 1.66804824]
+a_4: [0.83317658 0.84131543]
+f(x): [0.83317658 0.84131543]
+Predicted output for instance 1: [0.83317658 0.84131543]
+Expected output for instance 1: [0.75 0.98]
+Cost, J, associated with instance 1: 0.7907366961135718
+a_1: [1.   0.83 0.02]
+z_2: [0.5525 0.8138 0.1761 0.6041]
+a_2: [1.         0.63471542 0.69291867 0.54391158 0.64659376]
+z_3: [1.81695963 2.02468436 1.373268  ]
+a_3: [1.         0.86020091 0.88336451 0.79790763]
+z_4: [1.58227893 1.64577265]
+a_4: [0.82952703 0.83831889]
+f(x): [0.82952703 0.83831889]
+Predicted output for instance 1: [0.82952703 0.83831889]
+Expected output for instance 1: [0.75 0.28]
+Cost, J, associated with instance 2: 1.9437823352945296
+Final (regularized) cost, J, based on the complete training set: 1.9035095157040507
+Computing gradients based on training instance 1
+	delta4: [[ 0.08317658]
+ [-0.13868457]]
+	delta3: [[ 0.00638937]
+ [-0.00925379]
+ [-0.00778767]]
+	delta2: [[-0.00086743]
+ [-0.00133354]
+ [-0.00053312]
+ [-0.00070163]]
+	Gradients of Theta3 based on training instance 1:
+	[[ 0.08317658  0.0727957   0.07427351  0.06777264]
+ [-0.13868457 -0.121376   -0.12384003 -0.1130008 ]]
+	Gradients of Theta2 based on training instance 1:
+	[[ 0.00638937  0.00432557  0.00481656  0.00375802  0.00450872]
+ [-0.00925379 -0.00626478 -0.00697588 -0.00544279 -0.00653003]
+ [-0.00778767 -0.00527222 -0.00587066 -0.00458046 -0.00549545]]
+	Gradients of Theta1 based on training instance 1:
+	[[-0.00086743 -0.00027758 -0.00058985]
+ [-0.00133354 -0.00042673 -0.00090681]
+ [-0.00053312 -0.0001706  -0.00036252]
+ [-0.00070163 -0.00022452 -0.00047711]]
+Computing gradients based on training instance 2
+	delta4: [[0.07952703]
+ [0.55831889]]
+	delta3: [[0.01503437]
+ [0.05808969]
+ [0.06891698]]
+	delta2: [[0.01694006]
+ [0.01465141]
+ [0.01998824]
+ [0.01622017]]
+	Gradients of Theta3 based on training instance 2:
+	[[0.07952703 0.06840922 0.07025135 0.06345522]
+ [0.55831889 0.48026642 0.4931991  0.44548691]]
+	Gradients of Theta2 based on training instance 2:
+	[[0.01503437 0.00954254 0.01041759 0.00817737 0.00972113]
+ [0.05808969 0.03687042 0.04025143 0.03159565 0.03756043]
+ [0.06891698 0.04374267 0.04775386 0.03748474 0.04456129]]
+	Gradients of Theta1 based on training instance 2:
+	[[0.01694006 0.01406025 0.0003388 ]
+ [0.01465141 0.01216067 0.00029303]
+ [0.01998824 0.01659024 0.00039976]
+ [0.01622017 0.01346274 0.0003244 ]]
+The entire training set has been processed. Computing the average (regularized) gradients:
+Final regularized gradients of Theta3:
+[[0.0813518  0.17935246 0.12476243 0.13186393]
+ [0.20981716 0.19194521 0.30342954 0.25249305]]
+Final regularized gradients of Theta2:
+[[0.01071187 0.09068406 0.02511708 0.1259677  0.11586492]
+ [0.02441795 0.06780282 0.04163777 0.05307643 0.1267652 ]
+ [0.03056466 0.08923522 0.1209416  0.10270214 0.03078292]]
+Final regularized gradients of Theta1:
+[[0.00803632 0.02564134 0.04987447]
+ [0.00665894 0.01836697 0.06719311]
+ [0.00972756 0.03195982 0.05251862]
+ [0.00775927 0.05036911 0.08492365]]

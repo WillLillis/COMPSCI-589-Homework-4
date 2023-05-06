@@ -1,12 +1,12 @@
 ﻿from copy import deepcopy
 import numpy as np
 
-# - going to assume a fully connected NN for sake of simplicity
 class neural_net:
     # - input_nodes : specifies the number of input nodes
     # - hidden_layers : a list, where each entry is an integer specifying the number
     # of nodes in that layer
     # - lambda_ : regularization term
+    # - alpha : learning rate
     # - activ_func : which activation function to use
     def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_: float, alpha=1.0, activ_func="sigmoid"):
         # sanity checks 

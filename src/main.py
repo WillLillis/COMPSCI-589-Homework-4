@@ -15,22 +15,22 @@ def test_examples():
     test_nn.print_layers()
 
     instances = list([np.array([0.13]), np.array([0.42])])
-    labels = list([np.array([0.9]), np.array([0.23])])
+    labels = list([np.array([np.array([0.9])]), np.array([np.array([0.23])])])
     preds = list()
     
     preds.append(np.array([test_nn.forward_propagation(instances[0], test=True)])) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[0]}")
     print(f"Expected output for instance 1: {labels[0]}")
-    cost_1 = neural_net.indiv_cost_func(preds[0], np.array([labels[0]]))
+    cost_1 = neural_net.indiv_cost_func(preds[0], labels[0])
     print(f"Cost, J, associated with instance 1: {cost_1}")
 
     preds.append(np.array([test_nn.forward_propagation(instances[1], test=True)])) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 2: {preds[1]}")
     print(f"Expected output for instance 2: {labels[1]}")
-    cost_2 = neural_net.indiv_cost_func(preds[1], np.array([labels[1]]))
+    cost_2 = neural_net.indiv_cost_func(preds[1], labels[1])
     print(f"Cost, J, associated with instance 2: {cost_2}")
 
-    total_cost = test_nn.reg_cost_func(preds, np.array([labels]))
+    total_cost = test_nn.reg_cost_func(preds, labels)
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
     test_nn.backward_propagation(instances, labels, test=True)

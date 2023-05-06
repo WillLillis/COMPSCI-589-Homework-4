@@ -92,19 +92,19 @@ class neural_net:
     def forward_propagation_ret_act(self, instance: np.array) -> np.array:
         ret_activ = list()
         activation = np.insert(instance, 0, 1) # add the bias term to the input
-        ret_activ.append(np.array([activation]))
+        ret_activ.append(np.array([activation]).T)
 
         # for hidden layers 0...n-1
         for i in range(len(self.weights) - 1):
             activation = np.matmul(self.weights[i], activation) # multiply vector with hidden layer weights
             activation = self.activation_func(activation) # apply activation function g element-wise
             activation = np.insert(activation, 0, 1) # add bias term back in
-            ret_activ.append(np.array([activation]))
+            ret_activ.append(np.array([activation]).T)
         
         # apply last hidden layer, get output values
         activation = np.matmul(self.weights[-1], activation) 
         activation = self.activation_func(activation)
-        ret_activ.append(np.array([activation]))
+        ret_activ.append(np.array([activation]).T)
         return np.array([activation]), ret_activ
 
     # - TODO: fix numpy dimension issues
@@ -117,19 +117,13 @@ class neural_net:
 
         for index in range(len(grads)):
             grads[index] *= 0
-            if len(np.shape(grads[index])) == 1:
-                print("Do I still print?")
-                grads[index] = np.array([grads[index]])
 
         regularizers = deepcopy(grads)
 
         for index in range(len(instances)):
-            print(f"Computing gradients based on training instance {index + 1}")
+            if test == True:
+                print(f"Computing gradients based on training instance {index + 1}")
             preds, activations = self.forward_propagation_ret_act(instances[index])
-            print(f"{preds=}, {np.shape(preds)=}")
-            print(f"{activations=}")
-            for i in activations:
-                print(f"{np.shape(i)}")
             deltas = list()
             # Need lists with full length because we're indexing backwards
                 # - going to initialize with None so it'll be easier to tell 
@@ -139,7 +133,6 @@ class neural_net:
                 regularizers.append(None)
 
             deltas[-1] = preds - labels[index]
-            print(f"{deltas[-1]=}, {np.shape(deltas[-1])=}")
             
             if test == True:
                 print(f"\tdelta{len(deltas) + 1}: {deltas[-1]}")
@@ -148,8 +141,8 @@ class neural_net:
             for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
                 #tmp = np.matmul(np.array([self.weights[k]]).T, np.array([deltas[k]]))
                 tmp = np.matmul(self.weights[k].T, deltas[k])
-                tmp *= activations[k].T
-                tmp *= (1 - activations[k]).T
+                tmp *= activations[k]
+                tmp *= (1 - activations[k])
                 tmp = np.delete(tmp, 0)
                 if len(np.shape(tmp)) == 1:
                     deltas[k - 1] = np.array([tmp]).T
@@ -162,20 +155,17 @@ class neural_net:
                 
             # "For each network layer, k = L - 1...1"
             for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
-                tmp_activ = np.transpose(activations[k])
-                #if np.shape(tmp_activ) == (): # dimensionality fixes
-                #    tmp_activ = np.array([tmp_activ])
-                print(f"{np.shape(grads[k])=}, {np.shape(deltas[k])=}, {np.shape(tmp_activ.T)=}")
-                grads[k] += np.matmul(deltas[k], tmp_activ.T) # accumulates, in D(l=k), the gradients computed based on the current training instance
+                grads[k] += np.matmul(deltas[k], activations[k].T) # accumulates, in D(l=k), the gradients computed based on the current training instance
                 if test == True:
-                    test_tmp = np.matmul(deltas[k], tmp_activ.T)
+                    test_tmp = np.matmul(deltas[k], activations[k].T)
                     print(f"\tGradients of Theta{k + 1} based on training instance {index + 1}:\n\t{test_tmp}")
             
         # "For each network layer, k= L - 1...1"
         if test == True:
-            print("The entire training set has been processes. Computing the average (regularized) gradients:")
+            print("The entire training set has been processed. Computing the average (regularized) gradients:")
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = self.lambda_ * self.weights[k]
+            # TODO: Zero out first column
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
             print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"

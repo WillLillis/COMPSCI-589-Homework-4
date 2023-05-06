@@ -8,7 +8,7 @@ class neural_net:
     # - lambda_ : regularization term
     # - alpha : learning rate
     # - activ_func : which activation function to use
-    def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_: float, alpha=1.0, activ_func="sigmoid"):
+    def __init__(self, input_nodes: int, output_nodes: int, hidden_layers: list, lambda_=0.0, alpha=1.0, activ_func="sigmoid"):
         # sanity checks 
         if input_nodes <= 0:
             print(f"Invalid parameter: {input_nodes=}")
@@ -38,7 +38,6 @@ class neural_net:
             self.weights.append(weight_tmp)
         else:
             print("ERROR: INVALID DIMENSIONS!!!")
-
 
         # now for the hidden layers connecting to one another
         for i in range(len(hidden_layers) - 1):
@@ -111,7 +110,7 @@ class neural_net:
         return np.array([activation]), ret_activ
 
     def backward_propagation(self, instances: list, labels: list, test=False) -> None:
-        # check to make sure instances and labels is the same length!
+        # check to make sure instances and labels are the same length!
         if len(instances) != len(labels):
             print(f"Error: Mismatching dimensions betweent the prediction and labels arrays! {len(instances)=}, {len(labels)=}")
         # initialize D to all 0's, same dimension as the weights
@@ -168,10 +167,10 @@ class neural_net:
             print("The entire training set has been processed. Computing the average (regularized) gradients:")
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = self.lambda_ * self.weights[k]
-            # TODO: Zero out first column
-            regularizers[k][:, 0] = 0
+            regularizers[k][:, 0] = 0 # Zero out first column
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
-            print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
+            if(test==True):
+                print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...

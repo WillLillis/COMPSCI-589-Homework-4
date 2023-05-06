@@ -34,10 +34,6 @@ def test_examples():
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
     test_nn.backward_propagation(instances, labels, test=True)
-
-    return
-
-    # TODO: FIX dimension stuff
     #
     # Example 2:
     #
@@ -54,7 +50,7 @@ def test_examples():
     instances = list([np.array([0.32, 0.68]), np.array([0.83, 0.02])])
     labels = list([np.array([0.75, 0.98]), np.array([0.75, 0.28])])
     preds = list()
-
+    
     preds.append(test_nn.forward_propagation(instances[0], test=True)) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[0]}")
     print(f"Expected output for instance 1: {labels[0]}")
@@ -69,6 +65,8 @@ def test_examples():
 
     total_cost = test_nn.reg_cost_func(preds, labels)
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
+
+    test_nn.backward_propagation(instances, labels, test=True)
 
 
 def main():

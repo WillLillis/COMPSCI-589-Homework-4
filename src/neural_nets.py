@@ -133,13 +133,14 @@ class neural_net:
                 regularizers.append(None)
 
             deltas[-1] = preds - labels[index]
+            if len(np.shape(deltas[-1])) == 2:
+                deltas[-1] = deltas[-1].T
             
             if test == True:
                 print(f"\tdelta{len(deltas) + 1}: {deltas[-1]}")
 
             # "For each network layer, k = L - 1...2"
             for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
-                #tmp = np.matmul(np.array([self.weights[k]]).T, np.array([deltas[k]]))
                 tmp = np.matmul(self.weights[k].T, deltas[k])
                 tmp *= activations[k]
                 tmp *= (1 - activations[k])
@@ -166,6 +167,7 @@ class neural_net:
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = self.lambda_ * self.weights[k]
             # TODO: Zero out first column
+            regularizers[k][:, 0] = 0
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
             print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"

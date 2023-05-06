@@ -125,8 +125,7 @@ class neural_net:
 
         # BUGBUG will probably have issues when going from 1xn to mxn (casting to np.array())
         for index in range(len(instances)):
-            if test == True:
-                print(f"Computing gradients based on training instance {index + 1}")
+            print(f"Computing gradients based on training instance {index + 1}")
             preds, activations = self.forward_propagation_ret_act(instances[index])
             deltas = list()
             
@@ -165,11 +164,8 @@ class neural_net:
             print("The entire training set has been processes. Computing the average (regularized) gradients:")
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = self.lambda_ * self.weights[k]
-            print(f"{regularizers[k]=}")
-            #regularizers[k][:, 0] = 0 # set first column to 0
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
-            if test == True:
-                print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
+            print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...

@@ -90,11 +90,58 @@ def test_examples():
     print("Running backpropagation:")
     test_nn.backward_propagation(instances, labels, test=True) # intermediate values are printed within the function when the test flag is set
 
+def test_congress(hidden_layers: list, num_iterations: int) -> None:
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")
+    test_nn = neural_net(16, 2, hidden_layers)
+
+    # process k_folds stuff here...
+    k_folds_instances = k_folds_instances[0]
+    k_folds_labels = k_folds_labels[0]
+
+    for _ in range(num_iterations):
+        test_nn.backward_propagation(k_folds_instances, k_folds_labels)
+
+    num_instances = 0
+    num_correct = 0
+    for index in range(len(k_folds_instances)):
+        num_instances += 1
+        pred = test_nn.forward_propagation(k_folds_instances[index])
+        pred = np.argmax(pred) + 1
+        label = np.argmax(k_folds_labels[index][0]) + 1
+        if pred == label:
+            num_correct += 1
+
+    print(f"Congressional Dataset Accuracy: {num_correct / num_instances}")
+
+def test_wine(hidden_layers: list, num_iterations: int) -> None:
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
+    test_nn = neural_net(13, 3, hidden_layers)
+
+    k_folds_instances = k_folds_instances[0]
+    k_folds_labels = k_folds_labels[0]
+
+    for _ in range(num_iterations):
+        test_nn.backward_propagation(k_folds_instances, k_folds_labels)
+
+    num_instances = 0
+    num_correct = 0
+    for index in range(len(k_folds_instances)):
+        num_instances += 1
+        pred = test_nn.forward_propagation(k_folds_instances[index])
+        pred = np.argmax(pred) + 1
+        label = np.argmax(k_folds_labels[index][0]) + 1
+        if pred == label:
+            num_correct += 1
+
+    print(f"Wine Dataset Accuracy: {num_correct / num_instances}")
+
+
+
 
 def main():
     #k_folds_instances, k_folds_labels = k_folds_gen(10, "hw3_house_votes_84.csv", False)
     #k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv", False)
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv", True)
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
 
     k_folds_instances = k_folds_instances[0]
     k_folds_labels = k_folds_labels[0]
@@ -173,4 +220,6 @@ def main():
 
 if __name__ == "__main__":
     #main()
-    test_examples()
+    #test_examples()
+    test_congress(list([3,2]), 500)
+    test_congress(list([10,10,10]), 500)

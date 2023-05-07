@@ -14,7 +14,7 @@ def print_np_tabbed(array_in: np.array, num_tabs: int) -> None:
 # going to have to make some changes so the data is compatible with 
 # my NN model, but nothing crazy
 
-def k_folds_gen(k: int, file_name: str, normalize_attrs: bool):
+def k_folds_gen(k: int, file_name: str) -> None:
     # find class proportiions in data set
     # make k folds
     # populate each fold according to class proportions (randomly)
@@ -32,6 +32,14 @@ def k_folds_gen(k: int, file_name: str, normalize_attrs: bool):
             for i in range(1, len(data_set)):
                 for j in range(len(data_set[i])):
                     data_set[i][j] = int(float(data_set[i][j]))
+            for col in range(1, len(data_set[0])): # for all attributes
+                tmp_max = float('-inf')
+                tmp_min = float('inf')
+                for i in range(1, len(data_set)):
+                    tmp_max = max(tmp_max, data_set[i][col])
+                    tmp_min = min(tmp_min, data_set[i][col])
+                for j in range(1, len(data_set)):
+                    data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
         elif 'hw3_house_votes_84.csv' in file_name:
             data_reader = csv.reader(raw_data_file)
             data_set = list(data_reader)

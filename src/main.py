@@ -90,7 +90,7 @@ def test_examples():
     print("Running backpropagation:")
     test_nn.backward_propagation(instances, labels, test=True) # intermediate values are printed within the function when the test flag is set
 
-def test_congress(hidden_layers: list, num_iterations: int) -> None:
+def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")
     test_nn = neural_net(16, 2, hidden_layers)
 
@@ -113,7 +113,7 @@ def test_congress(hidden_layers: list, num_iterations: int) -> None:
 
     print(f"Congressional Dataset Accuracy: {num_correct / num_instances}")
 
-def test_wine(hidden_layers: list, num_iterations: int) -> None:
+def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
     test_nn = neural_net(13, 3, hidden_layers)
 
@@ -135,7 +135,7 @@ def test_wine(hidden_layers: list, num_iterations: int) -> None:
 
     print(f"Wine Dataset Accuracy: {num_correct / num_instances}")
 
-def test_cancer(hidden_layers: list, num_iterations: int) -> None:
+def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_cancer.csv")
     test_nn = neural_net(9, 2, hidden_layers)
 
@@ -156,12 +156,33 @@ def test_cancer(hidden_layers: list, num_iterations: int) -> None:
             num_correct += 1
     print(f"Cancer Dataset Accuracy: {num_correct / num_instances}")
 
+def test_contraceptive(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "cmc.csv")
+    test_nn = neural_net(9, 3, hidden_layers)
+
+    k_folds_instances = k_folds_instances[0]
+    k_folds_labels = k_folds_labels[0]
+
+    for _ in range(num_iterations):
+        test_nn.backward_propagation(k_folds_instances, k_folds_labels)
+
+    num_instances = 0
+    num_correct = 0
+    for index in range(len(k_folds_instances)):
+        num_instances += 1
+        pred = test_nn.forward_propagation(k_folds_instances[index])
+        #print(f"{pred=}")
+        #print(f"label={k_folds_labels[index][0]}")
+        pred = np.argmax(pred) + 1
+        label = np.argmax(k_folds_labels[index][0]) + 1
+        #print(f"{index}: {pred=}, {label=}")
+        if pred == label:
+            num_correct += 1
+    print(f"Contraceptive Choice Dataset Accuracy: {num_correct / num_instances}")
 
 
 
 def main():
-    #k_folds_instances, k_folds_labels = k_folds_gen(10, "hw3_house_votes_84.csv", False)
-    #k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv", False)
     k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
 
     k_folds_instances = k_folds_instances[0]
@@ -242,6 +263,7 @@ def main():
 if __name__ == "__main__":
     #main()
     #test_examples()
-    test_congress(list([3,2]), 500)
-    test_wine(list([10,10,10]), 500)
-    test_cancer(list([5,5]), 500)
+    test_congress(5, list([5,3]), 500)
+    test_wine(5, list([10,10,10]), 500)
+    test_cancer(5, list([5,5]), 500)
+    test_contraceptive(5, list([10,10,10]), 100)

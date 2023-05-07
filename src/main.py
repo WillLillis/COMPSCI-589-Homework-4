@@ -91,30 +91,77 @@ def test_examples():
     test_nn.backward_propagation(instances, labels, test=True) # intermediate values are printed within the function when the test flag is set
 
 def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")
+    k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "hw3_house_votes_84.csv")
     test_nn = neural_net(16, 2, hidden_layers)
 
-    # process k_folds stuff here...
-    k_folds_instances = k_folds_instances[0]
-    k_folds_labels = k_folds_labels[0]
+    accuracies = []
+    precisions = []
+    recalls = []
+    F1s = []
+    for k in range(num_folds):
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
+        data = []
+        labels = []
+        test_fold = k_folds_instances[k]
+        test_labels = k_folds_labels[k]
 
-    for _ in range(num_iterations):
-        test_nn.backward_propagation(k_folds_instances, k_folds_labels)
+        for index in range(num_folds):
+            if index != k:
+                data += k_folds_instances[index]
+                labels += k_folds_labels[index]
 
-    num_instances = 0
-    num_correct = 0
-    for index in range(len(k_folds_instances)):
-        num_instances += 1
-        pred = test_nn.forward_propagation(k_folds_instances[index])
-        pred = np.argmax(pred) + 1
-        label = np.argmax(k_folds_labels[index][0]) + 1
-        if pred == label:
-            num_correct += 1
 
-    print(f"Congressional Dataset Accuracy: {num_correct / num_instances}")
+        for _ in range(num_iterations):
+            test_nn.backward_propagation(data, labels)
+
+        num_instances = 0
+        num_correct = 0
+        for index in range(len(test_fold)):
+            num_instances += 1
+            pred = test_nn.forward_propagation(test_fold[index])
+            pred = np.argmax(pred)
+            label = np.argmax(test_labels[index][0])
+            if label == 0: # negative class instance
+                if pred == 0:
+                    TN += 1
+                elif pred == 1:
+                    FP +=1 
+                else:
+                    print("uh oh")
+            elif label == 1: # positive class instance
+                if pred == 0:
+                    FN += 1
+                elif pred == 1:
+                    TP += 1
+                else:
+                    print("uh ohh")
+            else:
+                print("uh ohhh")
+        if TP == 0 and TN == 0 and FP == 0 and FN == 0:
+            print(f"ERROR! {TP=} and {TN=} and {FP=} and {FN=}")
+            return
+        accuracies.append((TP + TN) / (TP + TN + FP + FN))
+        if TP == 0 and FP == 0:
+            print(f"ERROR! {TP=} and {FP=}")
+            return
+        precisions.append(TP / (TP + FP))
+        if TP == 0 and FN == 0:
+            print(f"ERROR! {TP=} and {FN=}")
+            return
+        recalls.append(TP / (TP + FN))
+        F1s.append((2.0 * precisions[-1] * recalls[-1]) / (precisions[-1] + recalls[-1]))
+
+    print(f"Congressional Dataset Results ({num_folds} folds, {hidden_layers=}, {num_iterations} backpropagations):")
+    print(f"\tAvg Accuracy: {sum(accuracies) / len(accuracies)}")
+    print(f"\tAvg Precision: {sum(precisions) / len(precisions)}")
+    print(f"\tAvg Recall: {sum(recalls) / len(recalls)}")
+    print(f"\tAvg F1 Score: {sum(F1s) / len(F1s)}")
 
 def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
+    k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "hw3_wine.csv")
     test_nn = neural_net(13, 3, hidden_layers)
 
     k_folds_instances = k_folds_instances[0]
@@ -136,7 +183,7 @@ def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     print(f"Wine Dataset Accuracy: {num_correct / num_instances}")
 
 def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_cancer.csv")
+    k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "hw3_cancer.csv")
     test_nn = neural_net(9, 2, hidden_layers)
 
     k_folds_instances = k_folds_instances[0]
@@ -157,7 +204,7 @@ def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> Non
     print(f"Cancer Dataset Accuracy: {num_correct / num_instances}")
 
 def test_contraceptive(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "cmc.csv")
+    k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "cmc.csv")
     test_nn = neural_net(9, 3, hidden_layers)
 
     k_folds_instances = k_folds_instances[0]
@@ -264,6 +311,6 @@ if __name__ == "__main__":
     #main()
     #test_examples()
     test_congress(5, list([5,3]), 500)
-    test_wine(5, list([10,10,10]), 500)
-    test_cancer(5, list([5,5]), 500)
-    test_contraceptive(5, list([10,10,10]), 100)
+    #test_wine(5, list([10,10,10]), 500)
+    #test_cancer(5, list([5,5]), 500)
+    #test_contraceptive(5, list([10,10,10]), 100)

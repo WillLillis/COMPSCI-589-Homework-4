@@ -1,5 +1,6 @@
 ﻿from copy import deepcopy
 import numpy as np
+from misc import print_np_tabbed
 
 class neural_net:
     # - input_nodes : specifies the number of input nodes
@@ -63,30 +64,33 @@ class neural_net:
             print("ERROR: INVALID DIMENSIONS!!!")
 
     # - propagate instance through the network, get np array of output nodes returned
-    def forward_propagation(self, instance: np.array, test=False) -> np.array:
+    def forward_propagation(self, instance: np.array, test=False, test_indent=1) -> np.array:
+        if test == True:
+            print('\t' * test_indent, f"Forward propagating the input {instance}")
+
         activation = np.insert(instance, 0, 1) # add the bias term to the input
         if test == True:
-            print(f"a_1: {activation}")
+            print('\t' * test_indent, f"a_1: {activation}")
 
         # for hidden layers 0...n-1
         for i in range(len(self.weights) - 1):
             activation = np.matmul(self.weights[i], activation) # multiply vector with hidden layer weights
             if test == True:
-                print(f"z_{i + 2}: {activation}") # the example files use 1 based indexing, hence the + 2....
+                print('\t' * test_indent, f"z_{i + 2}: {activation}") # the example files use 1 based indexing, hence the + 2....
             activation = self.activation_func(activation) # apply activation function g element-wise
             activation = np.insert(activation, 0, 1) # add bias term back in
             if test == True:
-                print(f"a_{i + 2}: {activation}")
+                print('\t' * test_indent, f"a_{i + 2}: {activation}")
         
         # apply last hidden layer, get output values
         activation = np.matmul(self.weights[-1], activation) 
         if test == True:
-            print(f"z_{len(self.weights) + 1}: {activation}")
+            print('\t' * test_indent, f"z_{len(self.weights) + 1}: {activation}")
         activation = self.activation_func(activation)
         if test == True:
-            print(f"a_{len(self.weights) + 1}: {activation}")
+            print('\t' * test_indent, f"a_{len(self.weights) + 1}: {activation}")
         if test == True:
-            print(f"f(x): {activation}")
+            print('\t' * test_indent, f"f(x): {activation}")
         return activation
 
     # same as forward_propagation but also returns the activations for each hidden layer
@@ -109,7 +113,7 @@ class neural_net:
         ret_activ.append(np.array([activation]).T) # Transpose to match expected shape in backprop alg
         return np.array([activation]), ret_activ
 
-    def backward_propagation(self, instances: list, labels: list, test=False) -> None:
+    def backward_propagation(self, instances: list, labels: list, test=False, test_indent=1) -> None:
         # check to make sure instances and labels are the same length!
         if len(instances) != len(labels):
             print(f"Error: Mismatching dimensions betweent the prediction and labels arrays! {len(instances)=}, {len(labels)=}")
@@ -123,7 +127,7 @@ class neural_net:
 
         for index in range(len(instances)):
             if test == True:
-                print(f"Computing gradients based on training instance {index + 1}")
+                print('\t' * test_indent, f"Computing gradients based on training instance {index + 1}")
             preds, activations = self.forward_propagation_ret_act(instances[index])
             deltas = list()
             # Need lists with full length because we're indexing backwards
@@ -138,7 +142,9 @@ class neural_net:
                 deltas[-1] = deltas[-1].T
             
             if test == True:
-                print(f"\tdelta{len(deltas) + 1}: {deltas[-1]}")
+                #print('\t' * test_indent, f"\tdelta{len(deltas) + 1}: {deltas[-1]}")
+                print('\t' * (test_indent + 1), f"delta{len(deltas) + 1}:")
+                print_np_tabbed(deltas[-1], test_indent + 1)
 
             # "For each network layer, k = L - 1...2"
             for k in range(len(self.weights) - 1, 0, -1): # confusing indices...
@@ -154,23 +160,26 @@ class neural_net:
                     print("Lol time to be sad")
                     raise("Dimension error!")
                 if test == True:
-                    print(f"\tdelta{k+1}: {deltas[k - 1]}")
+                    print('\t' * (test_indent + 1), f"delta{k+1}:")
+                    print_np_tabbed(deltas[k - 1], test_indent + 1)
                 
             # "For each network layer, k = L - 1...1"
             for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
                 grads[k] += np.matmul(deltas[k], activations[k].T) # accumulates, in D(l=k), the gradients computed based on the current training instance
                 if test == True:
-                    print(f"\tGradients of Theta{k + 1} based on training instance {index + 1}:\n\t{np.matmul(deltas[k], activations[k].T)}")
+                    print('\t' * (test_indent + 1), f"Gradients of Theta{k + 1} based on training instance {index + 1}:")
+                    print_np_tabbed(np.matmul(deltas[k], activations[k].T), test_indent + 1)
             
         # "For each network layer, k= L - 1...1"
         if test == True:
-            print("The entire training set has been processed. Computing the average (regularized) gradients:")
+            print('\t' * test_indent, "The entire training set has been processed. Computing the average (regularized) gradients:")
         for k in range(len(self.weights) - 1, -1, -1):
             regularizers[k] = self.lambda_ * self.weights[k]
             regularizers[k][:, 0] = 0 # Zero out first column
             grads[k] = (1 / len(instances)) * (grads[k] + regularizers[k])
             if(test==True):
-                print(f"Final regularized gradients of Theta{k+1}:\n{grads[k]}")
+                print('\t' * test_indent, f"Final regularized gradients of Theta{k+1}:")
+                print_np_tabbed(grads[k], test_indent)
         # "At this point, D^(l=1) contains the gradients of the weights θ(l=1); (…); and D(l=L-1) contains the gradients of the weights θ(l=L-1)"
         # "For each network layer, k = L - 1...1"
         for k in range(len(self.weights) - 1, -1, -1): # confusing indices...
@@ -182,7 +191,8 @@ class neural_net:
         elif self.activation_function == "ReLU":
             return [max(0, x) for x in input_arr]
         else:
-            raise(f"Invalid activation function parameter passed! {self.activation_function=}")
+            print(f"Invalid activation function parameter passed! {self.activation_function=}")
+            raise("Invalid parameter")
     
     # computes cost for INDIVIDUAL prediction and expected output instances
     @staticmethod
@@ -238,11 +248,12 @@ class neural_net:
         self.weights = deepcopy(weights_in)
         return True
 
-    def print_layers(self, dims=False)  -> None:
-        for layer in self.weights:
-            if dims == True:
-                print(np.shape(layer))
-            print(layer)
+    def print_layers(self, info=False, num_tabs=1)  -> None:
+        for i in range(len(self.weights)):
+            if info == True:
+                print(f"Layer {i+1}: {np.shape(self.weights[i])}")
+            #print(f"{self.weights[i]}\n")
+            print_np_tabbed(self.weights[i], num_tabs)
 
 def main():
     pass

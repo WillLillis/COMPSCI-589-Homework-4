@@ -8,6 +8,9 @@ import os
 import numpy as np
 
 
+def print_np_tabbed(array_in: np.array, num_tabs: int) -> None:
+    for row in array_in:
+        print('\t' * num_tabs, row)
 # going to have to make some changes so the data is compatible with 
 # my NN model, but nothing crazy
 
@@ -112,7 +115,6 @@ def k_folds_gen(k: int, file_name: str, normalize_attrs: bool):
                     new_entry = np.array([new_entry])
                     k_folds_instances[index].append(new_entry)
                     k_folds_labels[index].append(new_label)
-    # TODO: Still have to test this...
     elif len(class_proportions) == 3:
         for index in range(k):
             for _ in range(entries_per_fold):

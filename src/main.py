@@ -1,3 +1,5 @@
+from cmath import cos
+from string import printable
 import numpy as np
 from neural_nets import neural_net
 from misc import k_folds_gen
@@ -12,61 +14,81 @@ def test_examples():
     starting_weights = list([np.array([[0.4, 0.1], [0.3, 0.2]]), np.array([np.array([0.7, 0.5, 0.6])])])
     test_nn.set_weights(starting_weights)
     print("Neural net layers:")
-    test_nn.print_layers()
+    test_nn.print_layers(info=True)
 
     instances = list([np.array([0.13]), np.array([0.42])])
     labels = list([np.array([np.array([0.9])]), np.array([np.array([0.23])])])
     preds = list()
-    
+    costs = list()
+    print(f"Training set:")
+    for i in range(len(instances)):
+        print(f"Training instance {i + 1}")
+        print(f"x: {instances[i]}")
+        print(f"y: {labels[i]}")
+
+    print("Computing the error/cost, J, of the network")
+    print("Processing training instance 1:")
     preds.append(np.array([test_nn.forward_propagation(instances[0], test=True)])) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[0]}")
     print(f"Expected output for instance 1: {labels[0]}")
-    cost_1 = neural_net.indiv_cost_func(preds[0], labels[0])
-    print(f"Cost, J, associated with instance 1: {cost_1}")
+    costs.append(neural_net.indiv_cost_func(preds[0], labels[0]))
+    print(f"Cost, J, associated with instance 1: {costs[0]}")
 
+    print("Processing training instance 2:")
     preds.append(np.array([test_nn.forward_propagation(instances[1], test=True)])) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 2: {preds[1]}")
     print(f"Expected output for instance 2: {labels[1]}")
-    cost_2 = neural_net.indiv_cost_func(preds[1], labels[1])
-    print(f"Cost, J, associated with instance 2: {cost_2}")
+    costs.append(neural_net.indiv_cost_func(preds[1], labels[1]))
+    print(f"Cost, J, associated with instance 2: {costs[1]}")
 
     total_cost = test_nn.reg_cost_func(preds, labels)
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
-    test_nn.backward_propagation(instances, labels, test=True)
+    #   Backward Propagation:
+    print("Running backpropagation:")
+    test_nn.backward_propagation(instances, labels, test=True) # intermediate values are printed within the function when the test flag is set
+
     #
     # Example 2:
     #
     #   Forward Propagation:
-    print("Example 2:")
+    print("\n\n\nExample 2:")
     test_nn = neural_net(2, 2, [4, 3], 0.25)
     starting_weights = list([np.array([[0.42, 0.15, 0.4], [0.72, 0.1, 0.54], [0.01, 0.19, 0.42], [0.3, 0.35, 0.68]]), \
        np.array([[0.21, 0.67, 0.14, 0.96, 0.87], [0.87, 0.42, 0.2, 0.32, 0.89], [0.03, 0.56, 0.8, 0.69, 0.09]]), \
        np.array([[0.04, 0.87, 0.42, 0.53], [0.17, 0.1, 0.95, 0.69]])])
     test_nn.set_weights(starting_weights)
     print("Neural net layers:")
-    test_nn.print_layers()
+    test_nn.print_layers(info=True)
 
     instances = list([np.array([0.32, 0.68]), np.array([0.83, 0.02])])
     labels = list([np.array([0.75, 0.98]), np.array([0.75, 0.28])])
     preds = list()
-    
+    costs = list()
+    print(f"Training set:")
+    for i in range(len(instances)):
+        print(f"Training instance {i + 1}")
+        print(f"x: {instances[i]}")
+        print(f"y: {labels[i]}")
+
     preds.append(test_nn.forward_propagation(instances[0], test=True)) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[0]}")
     print(f"Expected output for instance 1: {labels[0]}")
-    cost_1 = neural_net.indiv_cost_func(preds[0], labels[0])
-    print(f"Cost, J, associated with instance 1: {cost_1}")
+    costs.append(neural_net.indiv_cost_func(preds[0], labels[0]))
+    print(f"Cost, J, associated with instance 1: {costs[0]}")
 
     preds.append(test_nn.forward_propagation(instances[1], test=True)) # a's and z's are printed within the function when the test flag is set
     print(f"Predicted output for instance 1: {preds[1]}")
     print(f"Expected output for instance 1: {labels[1]}")
-    cost_2 = neural_net.indiv_cost_func(preds[1], labels[1])
-    print(f"Cost, J, associated with instance 2: {cost_2}")
+    costs.append(neural_net.indiv_cost_func(preds[1], labels[1]))
+    print(f"Cost, J, associated with instance 2: {costs[1]}")
 
     total_cost = test_nn.reg_cost_func(preds, labels)
     print(f"Final (regularized) cost, J, based on the complete training set: {total_cost}")
 
-    test_nn.backward_propagation(instances, labels, test=True)
+    #   Backward Propagation:
+    print("Running backpropagation:")
+    test_nn.backward_propagation(instances, labels, test=True) # intermediate values are printed within the function when the test flag is set
 
 
 def main():
@@ -99,12 +121,12 @@ def main():
         pred = test_nn.forward_propagation(k_folds_instances[index])
         #print(f"{index}: {pred=}, {k_folds_labels[index]=}")
         #pred = np.argmax(pred)
-        print(f"Vals: {pred=}")
+        #print(f"Vals: {pred=}")
         pred = np.argmax(pred) + 1
         #print(f"{pred=}")
         #label = np.argmax(k_folds_labels[index][0])
         label = np.argmax(k_folds_labels[index][0]) + 1
-        print(f"{index}: {pred=}, {label=}")
+        #print(f"{index}: {pred=}, {label=}")
         if pred == label:
             num_correct += 1
         #pred = 0 if pred[0] >= pred[1] else 1
@@ -117,7 +139,7 @@ def main():
     print(f"(Before Training) Accuracy: {num_correct / num_instances}")
 
     ##test_nn.print_layers(dims=True)
-    for _ in range(1000):
+    for _ in range(100):
         test_nn.backward_propagation(k_folds_instances, k_folds_labels)
     ##test_nn.print_layers(dims=True)
 
@@ -128,12 +150,12 @@ def main():
         pred = test_nn.forward_propagation(k_folds_instances[index])
         #print(f"{index}: {pred=}, {k_folds_labels[index]=}")
         #pred = np.argmax(pred)
-        print(f"Vals: {pred=}")
+        #print(f"Vals: {pred=}")
         pred = np.argmax(pred) + 1
         #print(f"{pred=}")
         #label = np.argmax(k_folds_labels[index][0])
         label = np.argmax(k_folds_labels[index][0]) + 1
-        print(f"{index}: {pred=}, {label=}")
+        #print(f"{index}: {pred=}, {label=}")
         if pred == label:
             num_correct += 1
     #    #pred = 0 if pred[0] >= pred[1] else 1
@@ -150,5 +172,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    #test_examples()
+    #main()
+    test_examples()

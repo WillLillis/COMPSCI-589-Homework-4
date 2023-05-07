@@ -99,6 +99,7 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
     recalls = []
     F1s = []
     for k in range(num_folds):
+        test_nn = neural_net(16, 2, hidden_layers)
         TP = 0
         TN = 0
         FP = 0
@@ -118,7 +119,6 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
             test_nn.backward_propagation(data, labels)
 
         num_instances = 0
-        num_correct = 0
         for index in range(len(test_fold)):
             num_instances += 1
             pred = test_nn.forward_propagation(test_fold[index])
@@ -162,25 +162,159 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
 
 def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "hw3_wine.csv")
-    test_nn = neural_net(13, 3, hidden_layers)
 
-    k_folds_instances = k_folds_instances[0]
-    k_folds_labels = k_folds_labels[0]
+    accuracies = []
+    precisions = []
+    recalls = []
+    F1s = []
+    for k in range(num_folds):
+        test_nn = neural_net(13, 3, hidden_layers)
+        data = []
+        labels = []
+        test_fold = k_folds_instances[k]
+        test_labels = k_folds_labels[k]
 
-    for _ in range(num_iterations):
-        test_nn.backward_propagation(k_folds_instances, k_folds_labels)
+        for index in range(num_folds):
+            if index != k:
+                data += k_folds_instances[index]
+                labels += k_folds_labels[index]
 
-    num_instances = 0
-    num_correct = 0
-    for index in range(len(k_folds_instances)):
-        num_instances += 1
-        pred = test_nn.forward_propagation(k_folds_instances[index])
-        pred = np.argmax(pred) + 1
-        label = np.argmax(k_folds_labels[index][0]) + 1
-        if pred == label:
-            num_correct += 1
+        for _ in range(num_iterations):
+            test_nn.backward_propagation(data, labels)
 
-    print(f"Wine Dataset Accuracy: {num_correct / num_instances}")
+        accuracy1 = 0
+        accuracy2 = 0
+        accuracy3 = 0
+        precision1 = 0
+        precision2 = 0
+        precision3 = 0
+        recall1 = 0
+        recall2 = 0
+        recall3 = 0
+        F1_1 = 0
+        F1_2 = 0
+        F1_3 = 0
+
+        TP_1 = 0
+        TP_2 = 0
+        TP_3 = 0
+        TN_1 = 0
+        TN_2 = 0
+        TN_3 = 0
+        FP_1 = 0
+        FP_2 = 0
+        FP_3 = 0
+        FN_1 = 0
+        FN_2 = 0
+        FN_3 = 0
+        for index in range(len(test_fold)):
+            pred = test_nn.forward_propagation(test_fold[index])
+            pred = np.argmax(pred) + 1
+            label = np.argmax(test_labels[index][0]) + 1
+            if label == 1: # first class
+                if pred == 1:
+                    TP_1 += 1
+                    TN_2 += 1
+                    TN_3 += 1
+                elif pred == 2:
+                    FN_1 += 1
+                    FP_2 += 1
+                    TN_3 += 1
+                elif pred == 3:
+                    FN_1 += 1
+                    TN_2 += 1
+                    FP_3 += 1
+                else:
+                    print("uh oh")
+            elif label == 2: # second class
+                if pred == 1:
+                    FP_1 += 1
+                    FN_2 += 1
+                    TN_3 += 1
+                elif pred == 2:
+                    TN_1 += 1
+                    TP_2 += 1
+                    TN_3 += 1
+                elif pred == 3:
+                    TN_1 += 1
+                    FN_2 += 1
+                    FP_3 += 1
+                else:
+                    print("uh ohh")
+            elif label == 3: # third class
+                if pred == 1:
+                    FP_1 += 1
+                    TN_2 += 1
+                    FN_3 += 1
+                elif pred == 2:
+                    TN_1 += 1
+                    FP_2 += 1
+                    FN_3 += 1
+                elif pred == 3:
+                    TN_1 += 1
+                    TN_2 += 1
+                    TP_3 += 1
+                else:
+                    print("uh ohhh")
+        if TP_1 == 0 and TN_1 == 0 and FP_1 == 0 and FN_1 == 0:
+            print(f"ERROR: {TP_1=} and {TN_1=} and {FP_1=} and {FN_1=}")
+            return
+        accuracy1 = (TP_1 + TN_1) / (TP_1 + TN_1 + FP_1 + FN_1)
+        if TP_2 == 0 and TN_2 == 0 and FP_2 == 0 and FN_2 == 0:
+            print(f"ERROR: {TP_2=} and {TN_2=} and {FP_2=} and {FN_2=}")
+            return
+        accuracy2 = (TP_2 + TN_2) / (TP_2 + TN_2 + FP_2 + FN_2)
+        if TP_3 == 0 and TN_3 == 0 and FP_3 == 0 and FN_3 == 0:
+            print(f"ERROR: {TP_3=} and {TN_3=} and {FP_3=} and {FN_3=}")
+            return
+        accuracy3 = (TP_3 + TN_3) / (TP_3 + TN_3 + FP_3 + FN_3)
+        if TP_1 == 0 and FP_1 == 0:
+            print(f"ERROR: {TP_1=} and {FP_1=}")
+            return
+        precision1 = (TP_1) / (TP_1 + FP_1)
+        if TP_2 == 0 and FP_2 == 0:
+            print(f"ERROR: {TP_2=} and {FP_2=}")
+            return
+        precision2 = (TP_2) / (TP_2 + FP_2)
+        if TP_3 == 0 and FP_3 == 0:
+            print(f"ERROR: {TP_3=} and {FP_3=}")
+            return
+        precision3 = (TP_3) / (TP_3 + FP_3)
+        if TP_1 == 0 and FN_1 == 0:
+            print(f"ERROR: {TP_1=} and {FN_1=}")
+            return
+        recall1 = (TP_1) / (TP_1 + FN_1)
+        if TP_2 == 0 and FN_2 == 0:
+            print(f"ERROR: {TP_2=} and {FN_2=}")
+            return
+        recall2 = (TP_2) / (TP_2 + FN_2)
+        if TP_3 == 0 and FN_3 == 0:
+            print(f"ERROR: {TP_3=} and {FN_3=}")
+            return
+        recall3 = (TP_3) / (TP_3 + FN_3)
+        if precision1 == 0 and recall1 == 0:
+            print(f"ERROR: {precision1=} and {recall1=}")
+            return
+        F1_1 = (2.0 * precision1 * recall1) / (precision1 + recall1)
+        if precision2 == 0 and recall2 == 0:
+            print(f"ERROR: {precision2=} and {recall2=}")
+            return
+        F1_2 = (2.0 * precision2 * recall2) / (precision2 + recall2)
+        if precision3 == 0 and recall3 == 0:
+            print(f"ERROR: {precision3=} and {recall3=}")
+            return
+        F1_3 = (2.0 * precision3 * recall3) / (precision3 + recall3)
+    accuracies.append((accuracy1 + accuracy2 + accuracy3) / 3.0)
+    precisions.append((precision1 + precision2 + precision3) / 3.0)
+    recalls.append((recall1 + recall2 + recall3) / 3.0)
+    F1s.append((F1_1 + F1_2 + F1_3) / 3.0)
+    print(f"Wine Dataset Results ({num_folds} folds, {hidden_layers=}, {num_iterations} backpropagations):")
+    print(f"\tAvg Accuracy: {sum(accuracies) / len(accuracies)}")
+    print(f"\tAvg Precision: {sum(precisions) / len(precisions)}")
+    print(f"\tAvg Recall: {sum(recalls) / len(recalls)}")
+    print(f"\tAvg F1 Score: {sum(F1s) / len(F1s)}")
+
+    #print(f"Wine Dataset Accuracy: {num_correct / num_instances}")
 
 def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     k_folds_instances, k_folds_labels = k_folds_gen(num_folds, "hw3_cancer.csv")
@@ -310,7 +444,7 @@ def main():
 if __name__ == "__main__":
     #main()
     #test_examples()
-    test_congress(5, list([5,3]), 500)
-    #test_wine(5, list([10,10,10]), 500)
+    test_congress(5, list([5,3]), 100)
+    test_wine(5, list([10,10,10]), 100)
     #test_cancer(5, list([5,5]), 500)
     #test_contraceptive(5, list([10,10,10]), 100)

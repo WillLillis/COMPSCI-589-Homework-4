@@ -73,31 +73,31 @@ def k_folds_gen(k: int, file_name: str) -> None:
             for i in range(len(data_set)):
                 for j in range(len(data_set[i])):
                     data_set[i][j] = int(data_set[i][j])
-            for col in range(len(data_set[0]) - 1): # for all attributes
-                tmp_max = float('-inf')
-                tmp_min = float('inf')
-                for i in range(len(data_set)):
-                    tmp_max = max(tmp_max, data_set[i][col])
-                    tmp_min = min(tmp_min, data_set[i][col])
-                for j in range(len(data_set)):
-                    data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
+            #for col in range(len(data_set[0]) - 1): # for all attributes
+            #    tmp_max = float('-inf')
+            #    tmp_min = float('inf')
+            #    for i in range(len(data_set)):
+            #        tmp_max = max(tmp_max, data_set[i][col])
+            #        tmp_min = min(tmp_min, data_set[i][col])
+            #    for j in range(len(data_set)):
+            #        data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
             # normalize!!!
-            #col = 0 # need to normalize the age attribute...
-            #tmp_max = float('-inf')
-            #tmp_min = float('inf')
-            #for i in range(len(data_set)):
-            #    tmp_max = max(tmp_max, data_set[i][col])
-            #    tmp_min = min(tmp_min, data_set[i][col])
-            #for j in range(len(data_set)):
-            #    data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
-            #col = 3 # ...and the number of children attribute
-            #tmp_max = float('-inf')
-            #tmp_min = float('inf')
-            #for i in range(len(data_set)):
-            #    tmp_max = max(tmp_max, data_set[i][col])
-            #    tmp_min = min(tmp_min, data_set[i][col])
-            #for j in range(len(data_set)):
-            #    data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
+            col = 0 # need to normalize the age attribute...
+            tmp_max = float('-inf')
+            tmp_min = float('inf')
+            for i in range(len(data_set)):
+                tmp_max = max(tmp_max, data_set[i][col])
+                tmp_min = min(tmp_min, data_set[i][col])
+            for j in range(len(data_set)):
+                data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
+            col = 3 # ...and the number of children attribute
+            tmp_max = float('-inf')
+            tmp_min = float('inf')
+            for i in range(len(data_set)):
+                tmp_max = max(tmp_max, data_set[i][col])
+                tmp_min = min(tmp_min, data_set[i][col])
+            for j in range(len(data_set)):
+                data_set[j][col] = (data_set[j][col] - tmp_min) / (tmp_max - tmp_min)
         else:
             print(f"Bad file name passed as parameter! ({file_name})")
             return None

@@ -202,7 +202,14 @@ class neural_net:
             print(f"Error: Mismatching dimensions betweent the prediction and labels arrays! {np.shape(pred)}, {np.shape(label)}")
             raise("Dimension error!")
         accum = 0
+
+        # TODO: take this out????
+        if len(np.shape(pred)) == 2:
+            pred = pred[0]
+            label = label[0]
+
         for i in range(len(pred)):
+            #print(f"\t{pred[i]=}, {label[i]=}")
             accum += (-label[i] * (np.log(pred[i]))) - (1 - label[i]) * (np.log(1 - pred[i]))
         return accum
 
@@ -213,6 +220,8 @@ class neural_net:
         if len(preds) != len(labels):
             print(f"ERROR! Mismatching lengths for prediction and label lists. ({len(preds)=}, {len(labels)=})")
             return np.nan
+        elif len(preds) == 0:
+            return 0
 
         accum = 0
         # iterate through preds, and labels, get indiviudal costs into accum

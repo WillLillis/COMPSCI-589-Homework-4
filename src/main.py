@@ -1,4 +1,5 @@
 from cmath import cos
+import csv
 from string import printable
 import numpy as np
 from neural_nets import neural_net
@@ -98,7 +99,7 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
     recalls = []
     F1s = []
     for k in range(num_folds):
-        test_nn = neural_net(16, 2, hidden_layers)
+        test_nn = neural_net(16, 2, hidden_layers, alpha=0.1)
         TP = 0
         TN = 0
         FP = 0
@@ -114,8 +115,13 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
                 labels += k_folds_labels[index]
 
 
-        for _ in range(num_iterations):
-            test_nn.backward_propagation(data, labels)
+        # Trying out mini-batch updates here...
+        data_chunks = [data[x:x+20] for x in range(0, len(data), 20)] # https://stackoverflow.com/questions/9671224/split-a-python-list-into-other-sublists-i-e-smaller-lists
+        label_chunks = [labels[x:x+20] for x in range(0, len(labels), 20)]
+
+        for index in range(len(data_chunks)):
+            for _ in range(num_iterations):
+                test_nn.backward_propagation(data_chunks[index], label_chunks[index])
 
         tested = False
         for index in range(len(test_fold)):
@@ -179,8 +185,13 @@ def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
                 data += k_folds_instances[index]
                 labels += k_folds_labels[index]
 
-        for _ in range(num_iterations):
-            test_nn.backward_propagation(data, labels)
+        # Trying out mini-batch updates here...
+        data_chunks = [data[x:x+20] for x in range(0, len(data), 20)] # https://stackoverflow.com/questions/9671224/split-a-python-list-into-other-sublists-i-e-smaller-lists
+        label_chunks = [labels[x:x+20] for x in range(0, len(labels), 20)]
+
+        for index in range(len(data_chunks)):
+            for _ in range(num_iterations):
+                test_nn.backward_propagation(data_chunks[index], label_chunks[index])
 
         accuracy1 = 0
         accuracy2 = 0
@@ -340,9 +351,13 @@ def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> Non
                 data += k_folds_instances[index]
                 labels += k_folds_labels[index]
 
+        # Trying out mini-batch updates here...
+        data_chunks = [data[x:x+50] for x in range(0, len(data), 50)] # https://stackoverflow.com/questions/9671224/split-a-python-list-into-other-sublists-i-e-smaller-lists
+        label_chunks = [labels[x:x+50] for x in range(0, len(labels), 50)]
 
-        for _ in range(num_iterations):
-            test_nn.backward_propagation(data, labels)
+        for index in range(len(data_chunks)):
+            for _ in range(num_iterations):
+                test_nn.backward_propagation(data_chunks[index], label_chunks[index])
 
         tested = False
         for index in range(len(test_fold)):
@@ -405,10 +420,14 @@ def test_contraceptive(num_folds: int, hidden_layers: list, num_iterations: int)
             if index != k:
                 data += k_folds_instances[index]
                 labels += k_folds_labels[index]
+
+        # Trying out mini-batch updates here...
+        data_chunks = [data[x:x+100] for x in range(0, len(data), 100)] # https://stackoverflow.com/questions/9671224/split-a-python-list-into-other-sublists-i-e-smaller-lists
+        label_chunks = [labels[x:x+100] for x in range(0, len(labels), 100)]
         
-        # TODO: Try out mini-batch updates here
-        for _ in range(num_iterations):
-            test_nn.backward_propagation(data, labels)
+        for index in range(len(data_chunks)):
+            for _ in range(num_iterations):
+                test_nn.backward_propagation(data_chunks[index], label_chunks[index])
 
         accuracy1 = 0
         accuracy2 = 0
@@ -545,9 +564,38 @@ def test_contraceptive(num_folds: int, hidden_layers: list, num_iterations: int)
     print(f"\tAvg Recall: {sum(recalls) / len(recalls)}")
     print(f"\tAvg F1 Score: {sum(F1s) / len(F1s)}")
 
+def J_data():
+    test_nn = neural_net(16, 2, [5,5,5], lambda_=0.25, alpha=0.01)
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")
+
+    k_folds_instances = k_folds_instances[0]
+    k_folds_labels = k_folds_labels[0]
+
+    # create test set
+    test = []
+    test_labels = []
+    num_instances = len(k_folds_instances)
+    for _ in range(int(0.3 * num_instances)):
+        test.append(k_folds_instances.pop(-1))
+        test_labels.append(k_folds_labels.pop(-1))
+
+    with open(f"results.csv", 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        for a in range(5):
+            print(a)
+            for index_i in range(len(k_folds_instances)):
+                test_nn.backward_propagation(k_folds_instances[index_i], k_folds_labels[index_i])
+                if (index_i + 1) % 5 == 0:
+                    preds = list()
+                    for index in range(len(test)):
+                        preds.append(np.array([test_nn.forward_propagation(test[index])]))
+                    csv_writer.writerow([(index_i + 1) + (a * len(k_folds_instances)), test_nn.reg_cost_func(preds, test_labels)])
+                    #print(f"{(index_i + 1) * (a + 1)}, {test_nn.reg_cost_func(preds, test_labels)}")
+                    
 if __name__ == "__main__":
     #test_examples()
-    test_congress(5, list([5,3]), 200)
-    test_wine(5, list([10,10,10]), 200)
-    test_cancer(5, list([5,5]), 200)
-    test_contraceptive(2, list([10,10,10]), 200)
+    test_congress(5, list([10, 10, 10, 10, 10]), 200)
+    #test_wine(5, list([10, 10, 10]), 200)
+    #test_cancer(5, list([1]), 200)
+    #test_contraceptive(5, list([10,10,10]), 200)
+    #J_data()

@@ -596,7 +596,7 @@ def J_data():
                         preds.append(np.array([test_nn.forward_propagation(test[index])]))
                     csv_writer.writerow([(index_i + 1) + (a * len(k_folds_instances)), test_nn.reg_cost_func(preds, test_labels)])
                     #print(f"{(index_i + 1) * (a + 1)}, {test_nn.reg_cost_func(preds, test_labels)}")
-def main() 
+def main():
     #test_examples()
     #test_congress(5, list([10, 10, 10, 10, 10]), 200)
     #test_wine(5, list([10,10,10,10]), 200)

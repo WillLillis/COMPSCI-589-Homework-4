@@ -1,6 +1,4 @@
-from cmath import cos
 import csv
-from string import printable
 import numpy as np
 from neural_nets import neural_net
 from misc import k_folds_gen
@@ -99,7 +97,7 @@ def test_congress(num_folds: int, hidden_layers: list, num_iterations: int) -> N
     recalls = []
     F1s = []
     for k in range(num_folds):
-        test_nn = neural_net(16, 2, hidden_layers, alpha=0.1)
+        test_nn = neural_net(16, 2, hidden_layers, lambda_=0.0001, alpha=0.1)
         TP = 0
         TN = 0
         FP = 0
@@ -174,7 +172,7 @@ def test_wine(num_folds: int, hidden_layers: list, num_iterations: int) -> None:
     recalls = []
     F1s = []
     for k in range(num_folds):
-        test_nn = neural_net(13, 3, hidden_layers)
+        test_nn = neural_net(13, 3, hidden_layers, lambda_=0.0001, alpha=0.1)
         data = []
         labels = []
         test_fold = k_folds_instances[k]
@@ -336,7 +334,7 @@ def test_cancer(num_folds: int, hidden_layers: list, num_iterations: int) -> Non
     recalls = []
     F1s = []
     for k in range(num_folds):
-        test_nn = neural_net(9, 2, hidden_layers)
+        test_nn = neural_net(9, 2, hidden_layers, lambda_=0.0001, alpha=0.1)
         TP = 0
         TN = 0
         FP = 0
@@ -565,8 +563,15 @@ def test_contraceptive(num_folds: int, hidden_layers: list, num_iterations: int)
     print(f"\tAvg F1 Score: {sum(F1s) / len(F1s)}")
 
 def J_data():
-    test_nn = neural_net(16, 2, [5,5,5], lambda_=0.25, alpha=0.01)
-    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")
+    # Congressional Dataset
+    #test_nn = neural_net(16, 2, [10,10,10], lambda_=0.001, alpha=0.01)
+    #k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_house_votes_84.csv")\
+    # Wine Dataset
+    #test_nn = neural_net(13, 3, [10,10,10], lambda_=0.001, alpha=0.01)
+    #k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_wine.csv")
+    # Cancer Dataset
+    test_nn = neural_net(9, 2, [10,10], lambda_=0.001, alpha=0.01)
+    k_folds_instances, k_folds_labels = k_folds_gen(1, "hw3_cancer.csv")
 
     k_folds_instances = k_folds_instances[0]
     k_folds_labels = k_folds_labels[0]
@@ -581,7 +586,7 @@ def J_data():
 
     with open(f"results.csv", 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
-        for a in range(5):
+        for a in range(25):
             print(a)
             for index_i in range(len(k_folds_instances)):
                 test_nn.backward_propagation(k_folds_instances[index_i], k_folds_labels[index_i])
@@ -591,11 +596,13 @@ def J_data():
                         preds.append(np.array([test_nn.forward_propagation(test[index])]))
                     csv_writer.writerow([(index_i + 1) + (a * len(k_folds_instances)), test_nn.reg_cost_func(preds, test_labels)])
                     #print(f"{(index_i + 1) * (a + 1)}, {test_nn.reg_cost_func(preds, test_labels)}")
-                    
-if __name__ == "__main__":
+def main() 
     #test_examples()
-    test_congress(5, list([10, 10, 10, 10, 10]), 200)
-    #test_wine(5, list([10, 10, 10]), 200)
-    #test_cancer(5, list([1]), 200)
+    #test_congress(5, list([10, 10, 10, 10, 10]), 200)
+    #test_wine(5, list([10,10,10,10]), 200)
+    #test_cancer(5, list([20, 20, 20]), 200)
     #test_contraceptive(5, list([10,10,10]), 200)
-    #J_data()
+    J_data()               
+
+if __name__ == "__main__":
+    main()

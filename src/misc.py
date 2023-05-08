@@ -1,9 +1,7 @@
 # in an effort to keep this project more manageable, I'll reorganize and throw
 # some of the utility functions in here...
-from copy import deepcopy
 import csv
 import random
-import sys
 import os
 import numpy as np
 
